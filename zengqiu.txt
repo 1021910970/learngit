@@ -1,0 +1,52 @@
+#include "includes.h"
+
+
+
+
+void Speed_Init()
+{
+
+	GPIO_InitTypeDef GPIO_initStruct;
+	TIM_TimeBaseInitTypeDef TIM_timeBaseInitStruct;
+	TIM_OCInitTypeDef TIM_OCinitStruct;
+	
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3,ENABLE);							//使能TIM3时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOB,ENABLE);	//使能GPIOB时钟和复用功能
+	
+	GPIO_initStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;							//初始化PA.6为复用推挽输出
+	GPIO_initStruct.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_initStruct.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB,&GPIO_initStruct);
+	
+	
+	TIM_timeBaseInitStruct.TIM_Period = 899;//arr			//配置TIM
+	TIM_timeBaseInitStruct.TIM_Prescaler = 0;//pre
+	TIM_timeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_timeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM3,&TIM_timeBaseInitStruct);
+	
+	TIM_OCinitStruct.TIM_OCMode = TIM_OCMode_PWM2;	  		//输出模式
+	TIM_OCinitStruct.TIM_OCPolarity = TIM_OCPolarity_High;	//输出极性
+	TIM_OCinitStruct.TIM_OutputState = ENABLE;				//输出使能
+	TIM_OC3Init(TIM3,&TIM_OCinitStruct);				    //按照以上参数初始化TIM3的OC3
+
+	TIM_OC4Init(TIM3, &TIM_OCinitStruct)
+	
+	TIM_Cmd(TIM3,ENABLE);
+
+}
+
+void Speed_Enable(u16 left,u16 right)
+{
+
+	TIM_SetCompare3(TIM3,left);
+	TIM_SetCompare4(TIM3,right);
+
+}
+void Speed_Stop()
+{
+	TIM_SetCompare3(TIM3,0);
+	TIM_SetCompare4(TIM3,0);
+
+}
+
